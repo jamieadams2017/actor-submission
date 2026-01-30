@@ -10,23 +10,36 @@ import requests
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
-import os, json
+import os
+import json
 
 YT_API_KEY = os.getenv("YT_API_KEY", "").strip()
 
-def load_service_account_info() -> dict:
-    # 1) Try env var JSON
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
+
+def get_gspread_client():
+    # 1) Try env var JSON (if you ever use it)
     raw = os.getenv("GCP_SERVICE_ACCOUNT_JSON", "").strip()
     if raw:
-        return json.loads(raw)
+        info = json.loads(raw)
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+        return gspread.authorize(creds)
 
-    # 2) Try Render Secret File
-    secret_path = "/etc/secrets/GCP_SERVICE_ACCOUNT_JSON"
-    if os.path.exists(secret_path):
+    # 2) Try Render secret file (your current setup)
+    secret_path = os.getenv("GCP_SA_FILE", "/etc/secrets/GCP_SERVICE_ACCOUNT_JSON")
+    if secret_path and os.path.exists(secret_path):
         with open(secret_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            info = json.load(f)
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+        return gspread.authorize(creds)
 
-    raise RuntimeError("Missing Google credentials: set GCP_SERVICE_ACCOUNT_JSON env var or create /etc/secrets/GCP_SERVICE_ACCOUNT_JSON secret file.")
+    raise RuntimeError(
+        "Google credentials not found. Add a Render Secret File at /etc/secrets/GCP_SERVICE_ACCOUNT_JSON "
+        "or set env var GCP_SERVICE_ACCOUNT_JSON."
+    )
 
 # =========================
 # CONFIG
