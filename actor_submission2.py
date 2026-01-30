@@ -10,6 +10,15 @@ import requests
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
+import os, json
+
+YT_API_KEY = os.getenv("YT_API_KEY", "").strip()
+
+GCP_SERVICE_ACCOUNT_JSON = os.getenv("GCP_SERVICE_ACCOUNT_JSON", "").strip()
+if not GCP_SERVICE_ACCOUNT_JSON:
+    raise RuntimeError("Missing GCP_SERVICE_ACCOUNT_JSON in Render environment secrets")
+
+SERVICE_ACCOUNT_INFO = json.loads(GCP_SERVICE_ACCOUNT_JSON)
 
 # =========================
 # CONFIG
