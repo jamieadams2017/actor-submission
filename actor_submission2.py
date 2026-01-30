@@ -480,55 +480,58 @@ st.set_page_config(page_title="Actor Database — FB + YT", layout="wide")
 st.markdown(
     """
     <style>
-    /* Center the main content and limit width */
-    .block-container {
-        max-width: 1120px;              /* a bit wider to support 2-col layout */
-        padding-left: 2rem;
-        padding-right: 2rem;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    /* Slightly tighten vertical spacing */
-    .block-container > div {
-        padding-top: 1.25rem;
-    }
+/* Center layout (keep your width) */
+.block-container{
+  max-width: 980px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  margin: 0 auto;
+}
 
-    /* Card styles */
-    .card {
-        background: #f8f9fa;
-        border: 1px solid #e6e6e6;
-        border-radius: 10px;
-        padding: 1.1rem 1.2rem;
-    }
-    .card h4 { margin: 0 0 0.5rem 0; }
-    .card h5 { margin: 0.9rem 0 0.4rem 0; }
-    .muted { color: #666; font-size: 0.92rem; }
+/* Theme-aware card */
+.card{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 18px 18px;
+  color: var(--text-color);
+}
 
-    /* Sticky info panel */
-    .sticky {
-        position: sticky;
-        top: 1rem;
-    }
+/* Theme-aware muted text */
+.muted{
+  color: rgba(255,255,255,0.72);
+}
 
-    /* Small pill badge */
-    .pill {
-        display: inline-block;
-        padding: 0.18rem 0.55rem;
-        border-radius: 999px;
-        border: 1px solid #e6e6e6;
-        background: #ffffff;
-        font-size: 0.85rem;
-        color: #444;
-        margin-left: 0.5rem;
-        vertical-align: middle;
-    }
+/* If in LIGHT theme, adjust muted/card contrast */
+@media (prefers-color-scheme: light){
+  .card{
+    background: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .muted{
+    color: rgba(0,0,0,0.62);
+  }
+}
 
-    /* Checklist look */
-    .checklist li { margin-bottom: 0.25rem; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+/* Pill badge */
+.pill{
+  display:inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.08);
+  font-size: 12px;
+}
+
+/* Light theme pill border */
+@media (prefers-color-scheme: light){
+  .pill{
+    border: 1px solid rgba(0,0,0,0.10);
+    background: rgba(0,0,0,0.03);
+  }
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ---- Cleaner header ----
 st.markdown(
