@@ -14,11 +14,19 @@ import os, json
 
 YT_API_KEY = os.getenv("YT_API_KEY", "").strip()
 
-GCP_SERVICE_ACCOUNT_JSON = os.getenv("GCP_SERVICE_ACCOUNT_JSON", "").strip()
-if not GCP_SERVICE_ACCOUNT_JSON:
-    raise RuntimeError("Missing GCP_SERVICE_ACCOUNT_JSON in Render environment secrets")
+def load_service_account_info() -> dict:
+    # 1) Try env var JSON
+    raw = os.getenv("GCP_SERVICE_ACCOUNT_JSON", "").strip()
+    if raw:
+        return json.loads(raw)
 
-SERVICE_ACCOUNT_INFO = json.loads(GCP_SERVICE_ACCOUNT_JSON)
+    # 2) Try Render Secret File
+    secret_path = "/etc/secrets/GCP_SERVICE_ACCOUNT_JSON"
+    if os.path.exists(secret_path):
+        with open(secret_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    raise RuntimeError("Missing Google credentials: set GCP_SERVICE_ACCOUNT_JSON env var or create /etc/secrets/GCP_SERVICE_ACCOUNT_JSON secret file.")
 
 # =========================
 # CONFIG
