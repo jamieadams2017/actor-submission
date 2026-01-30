@@ -207,9 +207,11 @@ def normalize_youtube_handle_url(url: str) -> str:
     return u
 
 def _yt_key():
-    if "YT_API_KEY" not in st.secrets:
-        raise RuntimeError("Missing YT_API_KEY in Streamlit secrets.")
-    return str(st.secrets["YT_API_KEY"]).strip()
+    """Return YouTube API key from environment variable (Render) or raise when needed."""
+    key = os.getenv("YT_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError("Missing YT_API_KEY in environment variables (Render).")
+    return key
 
 
 def yt_search_channel_id(query: str) -> str:
@@ -364,20 +366,26 @@ def yt_canonical_actor_link(norm_url: str, channel_id: str) -> str:
 # GOOGLE SHEETS HELPERS
 # =========================
 def get_gspread_client():
-    if "gcp_service_account" in st.secrets:
-        info = dict(st.secrets["gcp_service_account"])
-    elif "gcp_service_account_json" in st.secrets:
-        import json
-        info = json.loads(st.secrets["gcp_service_account_json"])
-    else:
-        raise RuntimeError(
-            "Missing service account in Streamlit secrets. "
-            "Add [gcp_service_account] or gcp_service_account_json."
-        )
+    """Create a gspread client using Render Secret File or env var JSON (no Streamlit secrets)."""
+    # 1) Preferred on Render: Secret File mounted at /etc/secrets/<filename>
+    secret_path = os.getenv("GCP_SA_FILE", "/etc/secrets/GCP_SERVICE_ACCOUNT_JSON").strip()
+    if secret_path and os.path.exists(secret_path):
+        with open(secret_path, "r", encoding="utf-8") as f:
+            info = json.load(f)
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+        return gspread.authorize(creds)
 
-    creds = Credentials.from_service_account_info(info, scopes=SCOPES)
-    return gspread.authorize(creds)
+    # 2) Optional fallback: JSON stored directly in env var
+    raw = os.getenv("GCP_SERVICE_ACCOUNT_JSON", "").strip()
+    if raw:
+        info = json.loads(raw)
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+        return gspread.authorize(creds)
 
+    raise RuntimeError(
+        "Google credentials not found. On Render, add a Secret File named 'GCP_SERVICE_ACCOUNT_JSON' "
+        "(mounted at /etc/secrets/GCP_SERVICE_ACCOUNT_JSON) or set env var GCP_SERVICE_ACCOUNT_JSON."
+    )
 
 def open_worksheet(gc, worksheet_name: str):
     sh = gc.open_by_key(SPREADSHEET_ID)
