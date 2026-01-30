@@ -419,7 +419,7 @@ def load_db(sheet_name: str, platform: str):
     ws = open_worksheet(gc, sheet_name)
 
     if platform == "Facebook":
-        must_have = ["actor_name", "actor_link", "affiliation", "followers", "evidence", SUBMITTED_BY_COL, DATE_SUBMITTED_COL]
+        must_have = ["actor_name", "actor_link", "affiliation", "followers", "Verified", "evidence", SUBMITTED_BY_COL, DATE_SUBMITTED_COL]
     else:
         must_have = [
             "actor_name", "actor_link", "affiliation", "evidence",
@@ -450,7 +450,7 @@ def append_submission(sheet_name: str, platform: str, row_dict: dict):
     ws = open_worksheet(gc, sheet_name)
 
     if platform == "Facebook":
-        must_have = ["actor_name", "actor_link", "affiliation", "followers", "evidence", SUBMITTED_BY_COL, DATE_SUBMITTED_COL]
+        must_have = ["actor_name", "actor_link", "affiliation", "followers", "Verified", "evidence", SUBMITTED_BY_COL, DATE_SUBMITTED_COL]
     else:
         must_have = [
             "actor_name", "actor_link", "affiliation", "evidence",
@@ -740,6 +740,7 @@ with main_col:
             followers = ""
             if platform == "Facebook":
                 followers = st.text_input("followers")
+            verified_yes = st.checkbox("Verified: Yes")
                 
             submitted_by = st.text_input("Submitted by")
 
@@ -786,6 +787,7 @@ with main_col:
                     "actor_link": actor_link_clean,
                     "affiliation": affiliation.strip(),
                     "followers": followers.strip(),
+                    "Verified": "Yes" if verified_yes else "",
                     "evidence": evidence.strip(),
                     SUBMITTED_BY_COL: submitted_by.strip(),
                     DATE_SUBMITTED_COL: submitted_time_utc,
